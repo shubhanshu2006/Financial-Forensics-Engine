@@ -167,10 +167,15 @@ export default function GraphVisualization({ graphData, rings }) {
     if ((globalScale > 1.8 || node.suspicious || isRingMember) && !isDimmed) {
       const label = node.label || node.id
       const fontSize = Math.max(11 / globalScale, 5)
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light'
       ctx.font = `500 ${fontSize}px Inter, sans-serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'top'
-      ctx.fillStyle = isRingMember ? '#fff' : 'rgba(241, 245, 249, 0.8)'
+      if (isLight) {
+        ctx.fillStyle = isRingMember ? '#1a1030' : 'rgba(26, 16, 48, 0.85)'
+      } else {
+        ctx.fillStyle = isRingMember ? '#fff' : 'rgba(241, 245, 249, 0.8)'
+      }
       ctx.fillText(label, node.x, node.y + size + 3)
     }
 
@@ -179,11 +184,12 @@ export default function GraphVisualization({ graphData, rings }) {
 
   // Link color
   const linkColor = useCallback((link) => {
-    if (!highlightRing) return 'rgba(148,163,184,0.12)'
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+    if (!highlightRing) return isLight ? 'rgba(80,60,140,0.25)' : 'rgba(148,163,184,0.12)'
     const s = typeof link.source === 'object' ? link.source.id : link.source
     const t = typeof link.target === 'object' ? link.target.id : link.target
-    if (ringMembers.has(s) && ringMembers.has(t)) return 'rgba(255,255,255,0.4)'
-    return 'rgba(148,163,184,0.04)'
+    if (ringMembers.has(s) && ringMembers.has(t)) return isLight ? 'rgba(80,60,140,0.7)' : 'rgba(255,255,255,0.4)'
+    return isLight ? 'rgba(80,60,140,0.06)' : 'rgba(148,163,184,0.04)'
   }, [highlightRing, ringMembers])
 
   if (!graphData?.nodes?.length) {
