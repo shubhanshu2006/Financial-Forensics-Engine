@@ -81,6 +81,64 @@
   --gradient-surface: linear-gradient(160deg, rgba(24,14,38,0.95) 0%, rgba(14,10,22,0.98) 100%);
 }
 
+/* ── Light Theme Overrides ──────────────────────────────────── */
+[data-theme="light"] {
+  --bg:             #f5f3ff;
+  --bg-subtle:      #ede9fe;
+  --surface:        rgba(255, 255, 255, 0.97);
+  --surface-solid:  #ffffff;
+  --surface2:       rgba(237, 233, 254, 0.85);
+  --surface3:       rgba(221, 214, 254, 0.55);
+  --glass:          rgba(255, 255, 255, 0.88);
+  --glass-border:   rgba(168, 85, 247, 0.14);
+
+  --border:         rgba(0, 0, 0, 0.09);
+  --border-hover:   rgba(0, 0, 0, 0.16);
+  --border-accent:  rgba(168, 85, 247, 0.28);
+
+  --accent-glow:    rgba(168, 85, 247, 0.1);
+  --accent2-glow:   rgba(245, 158, 11, 0.1);
+  --danger-glow:    rgba(244, 63, 94, 0.08);
+  --warning-glow:   rgba(251, 146, 60, 0.08);
+  --safe-glow:      rgba(16, 185, 129, 0.08);
+  --gold-glow:      rgba(212, 175, 55, 0.09);
+
+  --text:           #0a0a0f;
+  --text-secondary: #1c1830;
+  --text-muted:     #3a3550;
+  --text-dimmed:    #6b6580;
+
+  --shadow-xs:   0 1px 3px rgba(0,0,0,0.07);
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.09);
+  --shadow:      0 4px 20px rgba(0,0,0,0.11);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,0.13);
+  --shadow-xl:   0 20px 80px rgba(0,0,0,0.16);
+  --shadow-glow: 0 0 60px rgba(168, 85, 247, 0.07);
+  --shadow-gold: 0 0 40px rgba(212, 175, 55, 0.05);
+
+  --gradient-surface: linear-gradient(160deg, rgba(237,233,254,0.95) 0%, rgba(245,243,255,0.98) 100%);
+}
+
+[data-theme="light"] body {
+  background: var(--bg);
+}
+[data-theme="light"] body::before {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(168,85,247,0.07) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 95% 105%, rgba(245,158,11,0.04) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 5% 80%, rgba(168,85,247,0.04) 0%, transparent 60%);
+}
+[data-theme="light"] body::after {
+  background-image: radial-gradient(circle, rgba(100,70,200,0.055) 1px, transparent 1px);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.18);
+}
+[data-theme="light"] ::selection {
+  background: rgba(168, 85, 247, 0.22);
+  color: #1a1030;
+}
+
 html {
   font-size: 16px;
   scroll-behavior: smooth;
