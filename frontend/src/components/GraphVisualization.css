@@ -93,20 +93,38 @@
   padding: 4px 10px;
   border: none;
   background: transparent;
-  color: var(--text-muted);
+  color: rgba(180, 170, 210, 0.80);
   font-size: 0.7rem;
-  font-weight: 500;
+  font-weight: 600;
   font-family: var(--font-sans);
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
   white-space: nowrap;
 }
-.filter-pill:hover { color: var(--text-secondary); }
+.filter-pill:hover { color: #e8e0ff; background: rgba(255,255,255,0.06); }
 .filter-pill.active {
-  background: var(--surface2);
-  color: var(--text);
+  background: rgba(168, 85, 247, 0.18);
+  color: #f0eaff;
   box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(168,85,247,0.25);
+}
+
+[data-theme="light"] .filter-pills {
+  background: #ffffff;
+  border-color: var(--border-hover);
+}
+[data-theme="light"] .filter-pill {
+  color: var(--text-muted);
+}
+[data-theme="light"] .filter-pill:hover {
+  color: var(--accent);
+  background: rgba(168,85,247,0.06);
+}
+[data-theme="light"] .filter-pill.active {
+  background: rgba(168,85,247,0.10);
+  color: var(--accent-dim);
+  border-color: rgba(168,85,247,0.22);
 }
 
 /* Zoom controls */
