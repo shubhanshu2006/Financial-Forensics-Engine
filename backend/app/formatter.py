@@ -36,6 +36,9 @@ log = logging.getLogger(__name__)
 # to keep the JSON payload manageable.
 _GRAPH_PAYLOAD_NODE_CAP = 2000
 
+# Community detection (Louvain) is O(n²) — skip for large graphs
+_COMMUNITY_MAX_NODES = 500
+
 
 def _risk_score(ring: Dict) -> float:
     """
@@ -125,8 +128,15 @@ def _compute_community_ids(G: nx.DiGraph) -> Dict[str, int]:
     """
     Detect communities using Louvain method.
     Returns mapping of node_id → community_id.
+    Skipped for large graphs (Louvain is O(n²) and can take 5-8 s on 1k+ nodes).
     """
     if G.number_of_nodes() == 0:
+        return {}
+    if G.number_of_nodes() > _COMMUNITY_MAX_NODES:
+        log.info(
+            "Community detection skipped: graph has %d nodes (limit %d)",
+            G.number_of_nodes(), _COMMUNITY_MAX_NODES,
+        )
         return {}
     try:
         undirected = G.to_undirected()

@@ -2,7 +2,7 @@
 
 > A production-grade web application that detects money muling networks in financial transaction data through graph analysis, statistical anomaly detection, and interactive visualization.
 
-**Live Demo:** _[Add your deployed URL here]_  
+**Live Demo:** _[https://financial-forensics-engine.vercel.app/]_  
 **GitHub:** [shubhanshu2006/Financial-Forensics-Engine](https://github.com/shubhanshu2006/Financial-Forensics-Engine)
 
 ---
