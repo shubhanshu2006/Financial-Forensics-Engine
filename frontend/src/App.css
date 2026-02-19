@@ -423,9 +423,9 @@
 /* ── Footer ─────────────────────────────────────────────────── */
 .footer {
   padding: 22px 0;
-  border-top: 1px solid rgba(255,255,255,0.04);
+  border-top: 1px solid var(--border);
   margin-top: auto;
-  background: rgba(4, 6, 13, 0.6);
+  background: var(--surface);
   backdrop-filter: blur(16px);
 }
 .footer-inner {
@@ -434,12 +434,12 @@
   justify-content: center;
   gap: 10px;
   font-size: 0.70rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-weight: 500;
 }
-.footer-sep { opacity: 0.25; }
+.footer-sep { opacity: 0.45; }
 
 /* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
