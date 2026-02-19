@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import time
@@ -143,29 +144,33 @@ async def analyze(
     G = build_graph(df, include_transactions=detail)
     log.info("build_graph: %.3fs", time.perf_counter() - t0)
 
-    # Run core detectors
+    # ── Run all detectors concurrently ────────────────────────────────────────
+    # All detectors are read-only on G / df and fully independent of each other.
+    # asyncio.to_thread dispatches each to the default ThreadPoolExecutor so they
+    # overlap on I/O waits and GIL-releasing pandas/numpy internals.
     t0 = time.perf_counter()
-    cycle_rings = detect_cycles(G)
-    log.info("detect_cycles: %.3fs → %d rings", time.perf_counter() - t0, len(cycle_rings))
-
-    t0 = time.perf_counter()
-    smurf_rings = detect_smurfing(df)
-    log.info("detect_smurfing: %.3fs → %d rings", time.perf_counter() - t0, len(smurf_rings))
-
-    t0 = time.perf_counter()
-    shell_rings = detect_shell_networks(G)
-    log.info("detect_shell_networks: %.3fs → %d rings", time.perf_counter() - t0, len(shell_rings))
-
-    t0 = time.perf_counter()
-    roundtrip_rings = detect_round_trips(G)
-    log.info("detect_round_trips: %.3fs → %d rings", time.perf_counter() - t0, len(roundtrip_rings))
-
-    # Run enrichment detectors
-    t0 = time.perf_counter()
-    anomaly_accounts = detect_amount_anomalies(df)
-    rapid_accounts = detect_rapid_movements(df)
-    structuring_accounts = detect_structuring(df)
-    log.info("enrichment detectors: %.3fs", time.perf_counter() - t0)
+    (
+        cycle_rings,
+        smurf_rings,
+        shell_rings,
+        roundtrip_rings,
+        anomaly_accounts,
+        rapid_accounts,
+        structuring_accounts,
+    ) = await asyncio.gather(
+        asyncio.to_thread(detect_cycles,           G),
+        asyncio.to_thread(detect_smurfing,         df),
+        asyncio.to_thread(detect_shell_networks,   G),
+        asyncio.to_thread(detect_round_trips,      G),
+        asyncio.to_thread(detect_amount_anomalies, df),
+        asyncio.to_thread(detect_rapid_movements,  df),
+        asyncio.to_thread(detect_structuring,      df),
+    )
+    log.info(
+        "all detectors (parallel): %.3fs → cycles=%d smurf=%d shell=%d rt=%d",
+        time.perf_counter() - t0,
+        len(cycle_rings), len(smurf_rings), len(shell_rings), len(roundtrip_rings),
+    )
 
     # Assign ring IDs 
     all_rings = assign_ring_ids(
