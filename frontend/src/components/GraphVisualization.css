@@ -470,6 +470,69 @@
 .text-danger { color: var(--danger); font-weight: 600; }
 .text-accent { color: var(--accent-light); font-weight: 600; }
 
+/* ── Light Mode Overrides ─────────────────────────────────────── */
+[data-theme="light"] .node-panel {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(168, 85, 247, 0.20);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.13), 0 0 0 1px rgba(168,85,247,0.08) inset;
+}
+[data-theme="light"] .node-panel-header {
+  background: linear-gradient(135deg, rgba(168,85,247,0.07), rgba(245,158,11,0.04));
+  border-bottom-color: rgba(168,85,247,0.12);
+}
+[data-theme="light"] .panel-title-row h3 {
+  color: #0a0a0f;
+}
+[data-theme="light"] .close-btn {
+  color: var(--text-muted);
+}
+[data-theme="light"] .close-btn:hover {
+  background: rgba(0,0,0,0.06);
+  color: var(--text);
+}
+[data-theme="light"] .meta-label {
+  color: #3a3550;
+}
+[data-theme="light"] .meta-value {
+  color: #0a0a0f;
+}
+[data-theme="light"] .meta-value.mono {
+  color: #1c1830;
+}
+[data-theme="light"] .score-label {
+  color: #0a0a0f;
+}
+[data-theme="light"] .risk-explanation-text {
+  background: rgba(244, 63, 94, 0.06);
+  border-color: rgba(244, 63, 94, 0.18);
+  color: #1c1830;
+}
+[data-theme="light"] .ring-tag {
+  background: rgba(168,85,247,0.08);
+  color: #6d28d9;
+  border-color: rgba(168,85,247,0.25);
+}
+[data-theme="light"] .ring-tag:hover {
+  background: rgba(168,85,247,0.15);
+  border-color: rgba(168,85,247,0.40);
+}
+[data-theme="light"] .community-badge {
+  background: rgba(168,85,247,0.10);
+  color: #6d28d9;
+  border-color: rgba(168,85,247,0.25);
+}
+[data-theme="light"] .temporal-meta {
+  color: #3a3550;
+}
+[data-theme="light"] .graph-footer {
+  background: rgba(237, 233, 254, 0.97);
+  color: var(--text-secondary);
+}
+[data-theme="light"] .graph-footer-sep {
+  opacity: 0.5;
+  color: var(--text-muted);
+}
+
 /* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .graph-toolbar { padding: 8px 12px; }
