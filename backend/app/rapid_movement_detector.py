@@ -38,24 +38,13 @@ def detect_rapid_movements(df: pd.DataFrame) -> Dict[str, Dict]:
     window_td = timedelta(minutes=RAPID_MOVEMENT_MINUTES)
     df_sorted = df.sort_values("timestamp")
 
-    # Build per-account sorted timestamp lists using vectorised groupby —
-    # avoids iterrows() which is O(N) in slow Python and takes ~15s on 10k rows.
-    recv_times: Dict[str, list] = (
-        df_sorted[["receiver_id", "timestamp"]]
-        .groupby("receiver_id")["timestamp"]
-        .apply(list)
-        .to_dict()
-    )
-    send_times: Dict[str, list] = (
-        df_sorted[["sender_id", "timestamp"]]
-        .groupby("sender_id")["timestamp"]
-        .apply(list)
-        .to_dict()
-    )
-
-    # Rename for the loop below (mirrors old variable names)
-    incoming = recv_times
-    outgoing = send_times
+    # Build per-account sorted timestamp lists in a single pass —
+    # avoids two groupby().apply(list) calls and their per-group overhead.
+    incoming: Dict[str, list] = {}
+    outgoing: Dict[str, list] = {}
+    for row in df_sorted[["sender_id", "receiver_id", "timestamp"]].itertuples(index=False):
+        outgoing.setdefault(row[0], []).append(row[2])
+        incoming.setdefault(row[1], []).append(row[2])
 
     all_accounts = set(incoming.keys()) & set(outgoing.keys())
 
