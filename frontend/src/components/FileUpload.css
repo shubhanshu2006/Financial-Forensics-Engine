@@ -42,6 +42,12 @@
 }
 .dropzone:hover::before { opacity: 1; }
 
+[data-theme="light"] .dropzone:hover {
+  background: rgba(245, 240, 255, 0.96);
+  border-color: rgba(168, 85, 247, 0.45);
+  box-shadow: 0 4px 32px rgba(168,85,247,0.10), 0 0 0 1px rgba(168,85,247,0.10);
+}
+
 .dropzone.dragging {
   border-color: var(--accent);
   border-style: solid;
