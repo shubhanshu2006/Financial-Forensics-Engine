@@ -101,13 +101,18 @@ def parse_csv(file_bytes: bytes) -> Tuple[pd.DataFrame, dict]:
             f"Missing required columns: {sorted(missing)}. "
             f"Found: {sorted(df.columns.tolist())}"
         )
-    df = df[list(REQUIRED_COLUMNS)].copy()
+    df = df[list(REQUIRED_COLUMNS)]  # no .copy() — downstream ops create views/copies as needed
 
     # 3. Strip whitespace ──────────────────────────────────────────────────────
     for col in ("transaction_id", "sender_id", "receiver_id", "timestamp"):
         df[col] = df[col].str.strip()
 
-    # 4. Drop empty-field rows ─────────────────────────────────────────────────
+    # 4. Build a boolean mask combining ALL row-level issues to drop in one
+    #    shot, avoiding 6+ intermediate .copy() calls that waste ~0.5s on
+    #    slow CPUs.
+    drop = pd.Series(False, index=df.index)
+
+    # Empty fields
     mask_empty = (
         df["transaction_id"].eq("") | df["sender_id"].eq("") |
         df["receiver_id"].eq("") | df["amount"].eq("") | df["timestamp"].eq("")
@@ -115,23 +120,22 @@ def parse_csv(file_bytes: bytes) -> Tuple[pd.DataFrame, dict]:
     n_empty = int(mask_empty.sum())
     if n_empty:
         stats["warnings"].append(f"Dropped {n_empty} rows with empty fields.")
-    df = df[~mask_empty].copy()
+        drop |= mask_empty
 
     # 5. Parse & validate amount ───────────────────────────────────────────────
     df["amount"] = pd.to_numeric(df["amount"], errors="coerce")
-    bad = df["amount"].isna()
-    if bad.any():
-        stats["warnings"].append(f"Dropped {int(bad.sum())} rows with non-numeric amount.")
-        df = df[~bad].copy()
+    bad_amt = df["amount"].isna()
+    if bad_amt.any():
+        stats["warnings"].append(f"Dropped {int(bad_amt.sum())} rows with non-numeric amount.")
+        drop |= bad_amt
 
     neg = df["amount"] <= 0
-    stats["negative_amounts"] = int(neg.sum())
+    stats["negative_amounts"] = int((neg & ~drop).sum())
     if stats["negative_amounts"]:
         stats["warnings"].append(
             f"Dropped {stats['negative_amounts']} rows with non-positive amount."
         )
-        df = df[~neg].copy()
-    df["amount"] = df["amount"].astype(float)
+        drop |= neg
 
     # 6. Parse timestamps ──────────────────────────────────────────────────────
     df["timestamp"] = _parse_timestamps(df["timestamp"])
@@ -140,36 +144,42 @@ def parse_csv(file_bytes: bytes) -> Tuple[pd.DataFrame, dict]:
         stats["warnings"].append(
             f"Dropped {int(bad_ts.sum())} rows with unparseable timestamp."
         )
-        df = df[~bad_ts].copy()
+        drop |= bad_ts
 
-    # 7. Cast IDs to str ───────────────────────────────────────────────────────
+    # 7. Apply single combined drop ────────────────────────────────────────────
+    if drop.any():
+        df = df[~drop]
+
+    df["amount"] = df["amount"].astype(float)
+
+    # 8. Cast IDs to str ───────────────────────────────────────────────────────
     for col in ("transaction_id", "sender_id", "receiver_id"):
         df[col] = df[col].astype(str)
 
-    # 8. Remove self-transactions ──────────────────────────────────────────────
+    # 9. Remove self-transactions ──────────────────────────────────────────────
     self_tx = df["sender_id"] == df["receiver_id"]
     stats["self_transactions"] = int(self_tx.sum())
     if stats["self_transactions"]:
         stats["warnings"].append(
             f"Dropped {stats['self_transactions']} self-transactions."
         )
-        df = df[~self_tx].copy()
+        df = df[~self_tx]
 
-    # 9. Deduplicate transaction_id ────────────────────────────────────────────
+    # 10. Deduplicate transaction_id ───────────────────────────────────────────
     dups = df.duplicated(subset=["transaction_id"], keep="first")
     stats["duplicate_tx_ids"] = int(dups.sum())
     if stats["duplicate_tx_ids"]:
         stats["warnings"].append(
             f"Dropped {stats['duplicate_tx_ids']} duplicate transaction_id rows."
         )
-        df = df[~dups].copy()
+        df = df[~dups]
 
-    # 10. Row limit ────────────────────────────────────────────────────────────
+    # 11. Row limit ────────────────────────────────────────────────────────────
     if len(df) > MAX_ROWS:
         stats["warnings"].append(
             f"Dataset truncated from {len(df)} to {MAX_ROWS} rows."
         )
-        df = df.head(MAX_ROWS).copy()
+        df = df.head(MAX_ROWS)
 
     if df.empty:
         raise ValueError(

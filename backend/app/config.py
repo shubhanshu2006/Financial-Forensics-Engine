@@ -14,7 +14,7 @@ MAX_ROWS: int = int(os.getenv("MAX_ROWS", "10000"))
 CYCLE_MIN_LEN: int = 3
 CYCLE_MAX_LEN: int = 5
 MAX_CYCLES: int = int(os.getenv("MAX_CYCLES", "5000"))
-CYCLE_TIMEOUT_SECONDS: float = float(os.getenv("CYCLE_TIMEOUT_SECONDS", "5.0"))
+CYCLE_TIMEOUT_SECONDS: float = float(os.getenv("CYCLE_TIMEOUT_SECONDS", "3.0"))
 
 # ── Smurfing detection ─────────────────────────────────────────────────────────
 FAN_THRESHOLD: int = int(os.getenv("FAN_THRESHOLD", "10"))

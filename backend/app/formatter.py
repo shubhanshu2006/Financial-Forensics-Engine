@@ -33,11 +33,16 @@ from .config import RING_RISK, MIN_SUSPICION_SCORE
 log = logging.getLogger(__name__)
 
 # Graph visualisation cap: if > this many nodes, strip edge transaction lists
-# to keep the JSON payload manageable.
-_GRAPH_PAYLOAD_NODE_CAP = 2000
+# to keep the JSON payload manageable and processing fast.
+_GRAPH_PAYLOAD_NODE_CAP = 300
 
-# Community detection (Louvain) is O(n²) — skip for large graphs
-_COMMUNITY_MAX_NODES = 500
+# Community detection (Louvain) is O(n²) — skip for large graphs.
+# Lowered from 500 to 200 — Louvain takes 2-4s on slow CPUs (Render free tier).
+_COMMUNITY_MAX_NODES = 200
+
+# Temporal profile computation cap: iterates all edges of each suspicious node.
+# Skip for larger graphs to save ~0.5-1s on slow CPUs.
+_TEMPORAL_MAX_NODES = 300
 
 
 def _risk_score(ring: Dict) -> float:
@@ -287,10 +292,11 @@ def format_output(
                 nd["ring_ids"]          = acc_info.get("ring_ids", [])
                 nd["risk_explanation"]  = acc_info.get("risk_explanation", "")
 
-                # Add temporal profile for suspicious nodes
-                tp = _temporal_profile(G, node)
-                if tp:
-                    nd["temporal_profile"] = tp
+                # Temporal profiles are expensive on slow CPUs — skip for larger graphs
+                if G.number_of_nodes() <= _TEMPORAL_MAX_NODES:
+                    tp = _temporal_profile(G, node)
+                    if tp:
+                        nd["temporal_profile"] = tp
             nodes.append(nd)
 
         edges: List[Dict] = []

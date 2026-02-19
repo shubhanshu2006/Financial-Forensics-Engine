@@ -139,9 +139,12 @@ async def analyze(
         total_accounts,
     )
 
-    #  Build graph (skip per-tx edge lists when detail=False — saves ~0.5s on slow CPUs)
+    #  Build graph
+    # Always skip per-edge transaction lists — they are only used for temporal
+    # profiles and graph payload "transactions" arrays, both of which are now
+    # skipped for large graphs.  Saves ~1-2s on slow CPUs (Render free tier).
     t0 = time.perf_counter()
-    G = build_graph(df, include_transactions=detail)
+    G = build_graph(df, include_transactions=False)
     log.info("build_graph: %.3fs", time.perf_counter() - t0)
 
     # ── Run all detectors concurrently ────────────────────────────────────────
