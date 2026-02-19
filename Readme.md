@@ -335,7 +335,7 @@ All defaults are set in `backend/app/config.py`. Override via environment variab
 
 | Method | Path       | Description                                |
 | ------ | ---------- | ------------------------------------------ |
-| GET    | `/`        | Redirect to docs                           |
+| GET    | `/`        | Service info (`status`, `version`)         |
 | GET    | `/health`  | Health check with version and config info  |
 | POST   | `/analyze` | Upload CSV and run full forensics pipeline |
 
@@ -390,13 +390,16 @@ Additionally includes:
 financial-forensics-engine/
 ├── backend/
 │   ├── requirements.txt              # Python dependencies
+│   ├── .env.example                  # Environment variable reference (all optional)
+│   ├── test_integration.py           # Integration test suite
+│   ├── validate.py                   # Standalone output validation script
 │   └── app/
 │       ├── __init__.py
 │       ├── config.py                  # Centralised config, all thresholds
-│       ├── models.py                  # Pydantic v2 schemas (defined but not wired into pipeline)
+│       ├── models.py                  # Pydantic v2 schemas
 │       ├── main.py                    # FastAPI app, /analyze endpoint, middleware
 │       ├── parser.py                  # CSV validation (encoding, types, dedup)
-│       ├── graph_builder.py           # NetworkX DiGraph with vectorised stats
+│       ├── graph_builder.py           # NetworkX DiGraph with vectorised stats + SCC cache
 │       ├── cycle_detector.py          # Johnson's algorithm + timeout + dedup
 │       ├── smurf_detector.py          # Two-pointer sliding window fan detection
 │       ├── shell_detector.py          # Iterative DFS shell chain finder
@@ -418,11 +421,18 @@ financial-forensics-engine/
 │       ├── main.jsx
 │       └── components/
 │           ├── FileUpload.jsx         # Drag-and-drop CSV upload + sample download
+│           ├── FileUpload.css
 │           ├── GraphVisualization.jsx  # Force-directed graph with node detail panel
+│           ├── GraphVisualization.css
 │           ├── SummaryStats.jsx       # Overview stat cards
+│           ├── SummaryStats.css
 │           ├── SummaryTable.jsx       # Fraud rings + suspicious accounts tables
-│           └── DownloadButton.jsx     # JSON report download
-├── Features.md                        # Detailed documentation of all 25 features
+│           ├── SummaryTable.css
+│           ├── DownloadButton.jsx     # JSON report download
+│           └── DownloadButton.css
+├── render.yaml                        # Render deployment config (backend)
+├── PROBLEM_STATEMENT.md               # Hackathon problem statement
+├── Features.md                        # Detailed documentation of all detection features
 ├── .gitignore
 └── README.md
 ```
@@ -433,7 +443,7 @@ financial-forensics-engine/
 
 | Metric                 | Target   | Achieved                                                                             |
 | ---------------------- | -------- | ------------------------------------------------------------------------------------ |
-| Processing Time        | ≤ 30s    | < 0.5s for 1K rows, ~9s for 10K rows (graph 26× faster; SCC-bounded cycle search)    |
+| Processing Time        | ≤ 30s    | < 0.5s for 1K rows, ~15s for 10K rows locally; ~30s on Render free tier (0.1 vCPU)   |
 | Precision              | ≥ 70%    | CV-based merchant exclusion + batch payroll detection + shell intermediary-only rule |
 | Recall                 | ≥ 60%    | 7 detection patterns + 4 enrichment bonuses catch multi-layered schemes              |
 | False Positive Control | Required | Semantic CV/batch exclusion; shell members = intermediaries only                     |
@@ -472,12 +482,12 @@ financial-forensics-engine/
 
 ## Team Members
 
-| Name             | Role        |
-| ---------------- | ----------- |
-| Ayush Rai        | _Add roles_ |
-| Harsh Upadhyay   | _Add roles_ |
-| Prerna Negi      | _Add roles_ |
-| Shubhanshu Singh | _Add roles_ |
+| Name             | Role                                                            |
+| ---------------- | --------------------------------------------------------------- |
+| Ayush Rai        | Frontend, UI Developer & Testing Lead                           |
+| Harsh Upadhyay   | Detection Algorithms, Performance Optimization and UX Developer |
+| Prerna Negi      | Research, Technical Documentation & Presentation Lead           |
+| Shubhanshu Singh | Backend & Integration Lead                                      |
 
 ---
 
